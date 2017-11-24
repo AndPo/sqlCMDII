@@ -41,8 +41,8 @@ public class DataBaseManagerTest {
         assertEquals(1, users.length);
 
         DataSet user = users[0];
-        assertEquals("[name, surname, id]", user.getNames());
-        assertEquals("[New, Friend, 10]", user.getValues());
+        assertEquals("[name, surname, id]", Arrays.toString(user.getNames()));
+        assertEquals("[Andriy, Popovych, 9]", Arrays.toString(user.getValues()));
 
     }
 

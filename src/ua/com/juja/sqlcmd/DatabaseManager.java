@@ -67,7 +67,7 @@ public class DatabaseManager {
             Statement stmt = connection.createStatement();
               //                              (" + tableNames +  ") "    <-----------------
             stmt.executeUpdate("INSERT INTO users " +
-                    "VALUES " + values + ");");
+                    "VALUES (" + values + ");");
 
           //todo  insert into users(name, surname, id) values('Pops', 'Perops', 13);
 
