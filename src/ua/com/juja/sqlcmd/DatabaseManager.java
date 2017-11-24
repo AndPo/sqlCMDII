@@ -17,29 +17,68 @@ public class DatabaseManager {
 
         manager.connect(database, login, password);
 
-        Connection connection = manager.getConnection(database, login, password);
+        Connection connection = manager.getConnection();
+
+        //clear table
+        manager.clear("users");
 
         //insert
-        Statement stmt = connection.createStatement();
-        stmt.executeUpdate("INSERT INTO users(name, surname, id) VALUES ('New', 'Friend', 101);");
-        stmt.close();
+        DataSet data = new DataSet();
+        data.put("name", "Andriy");
+        data.put("surname", "Popovych");
+        data.put("id", 9);
+        manager.create(data);
 
         //select
-        //ResultSet rs = manager.getTableNames();
+//        String [] tableNames = manager.getTableNames();
+//        tableNames.toString();
+
+
+        //get data
+//        DataSet[] tablesData = manager.getTableData("users");
+//        for (int i = 0; i < tablesData.length; i++) {
+//            System.out.println(tablesData[i].toString());
+//        }
 
 
 
-        //select tableNames
-        String[] tables = manager.getTableNames();
 
-        //delete
-        stmt = connection.createStatement();
-        stmt.executeUpdate("DELETE FROM users4delete WHERE id > 50 and id < 5");
-        stmt.close();
 
-        connection.close();
+        System.out.println("it's working!!!");
 
     }
+
+    public void create(DataSet input) {
+        try {
+
+
+            String tableNames = "";
+            for (String name: input.getNames()) {
+                tableNames += name + ",";
+            }
+            tableNames = tableNames.substring(0, tableNames.length() - 1);
+
+            String values = "";
+            for (Object value: input.getValues()){
+                values += "'" + value.toString() + "'" + ",";
+            }
+            values = values.substring(0, values.length()-1);
+
+            Statement stmt = connection.createStatement();
+              //                              (" + tableNames +  ") "    <-----------------
+            stmt.executeUpdate("INSERT INTO users " +
+                    "VALUES " + values + ");");
+
+          //todo  insert into users(name, surname, id) values('Pops', 'Perops', 13);
+
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("create method didn't work " );
+            e.printStackTrace();
+        }
+    }
+
+
 
     public String[] getTableNames(){
         try {
@@ -73,16 +112,15 @@ public class DatabaseManager {
             while (rs.next()) {
                 DataSet dataSet = new DataSet();
                 result[index++] = dataSet;
-                for(int i = 0; i < size; i++) {
+                for(int i = 1; i <= columnSize; i++) {
                   dataSet.put(rsmd.getColumnName(i), rs.getObject(i));
                 }
             }
             rs.close();
             stmt.close();
-
             return result;
-
         }catch(SQLException ex){
+            System.out.println("TableData problem...");
             ex.printStackTrace();
             return null;
         }
@@ -97,7 +135,7 @@ public class DatabaseManager {
         return size;
     }
 
-    private Connection getConnection(String database, String login, String password) {
+    private Connection getConnection() {
         return connection;
     }
 
@@ -118,4 +156,15 @@ public class DatabaseManager {
 
     }
 
+    public void clear(String tableName) {
+        try {
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("DELETE FROM " +  tableName);
+            stmt.close();
+            //connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("problem with clearing table " + tableName);
+        }
+    }
 }
