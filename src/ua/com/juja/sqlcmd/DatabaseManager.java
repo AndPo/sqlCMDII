@@ -61,25 +61,40 @@ public class DatabaseManager {
         }
     }
 
-    public ResultSet select() {
+    public DataSet[] getTableData(String tableName) {
         try {
-            Statement stmt;
-            stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE id > 5");
+            int size = getSize(tableName);
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnSize = rsmd.getColumnCount();
+            DataSet[]result = new DataSet[size];
+            int index = 0;
             while (rs.next()) {
-                System.out.print("Name: " + rs.getString(1));
-                System.out.print("  ");
-                System.out.print("Surname: " + rs.getString(2));
-                System.out.print("  ");
-                System.out.println("id: " + rs.getString(3));
+                DataSet dataSet = new DataSet();
+                result[index++] = dataSet;
+                for(int i = 0; i < size; i++) {
+                  dataSet.put(rsmd.getColumnName(i), rs.getObject(i));
+                }
             }
             rs.close();
             stmt.close();
-            return rs;
+
+            return result;
+
         }catch(SQLException ex){
             ex.printStackTrace();
             return null;
         }
+    }
+
+    private int getSize(String tableName) throws SQLException {
+        Statement stmt = connection.createStatement();
+        ResultSet rsCount = stmt.executeQuery("SELECT COUNT (*) FROM public." + tableName);
+        rsCount.next();
+        int size = rsCount.getInt(1);
+        rsCount.close();
+        return size;
     }
 
     private Connection getConnection(String database, String login, String password) {
