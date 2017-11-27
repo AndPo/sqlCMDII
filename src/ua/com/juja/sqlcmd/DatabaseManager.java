@@ -2,75 +2,20 @@ package ua.com.juja.sqlcmd;
 
 import java.sql.*;
 import java.util.Arrays;
+import java.util.Random;
 
 public class DatabaseManager {
 
     private Connection connection;
 
-    public static void main(String[] args) throws  ClassNotFoundException, SQLException{
-
-        String database = "postgres";
-        String login = "postgres";
-        String password = "postgres";
-
-        DatabaseManager manager = new DatabaseManager();
-
-        manager.connect(database, login, password);
-
-        Connection connection = manager.getConnection();
-
-        //clear table
-        manager.clear("users");
-
-        //insert
-        DataSet data = new DataSet();
-        data.put("name", "Andriy");
-        data.put("surname", "Popovych");
-        data.put("id", 9);
-        manager.create(data);
-
-        //select
-//        String [] tableNames = manager.getTableNames();
-//        tableNames.toString();
-
-
-        //get data
-//        DataSet[] tablesData = manager.getTableData("users");
-//        for (int i = 0; i < tablesData.length; i++) {
-//            System.out.println(tablesData[i].toString());
-//        }
-
-
-
-
-
-        System.out.println("it's working!!!");
-
-    }
-
     public void create(DataSet input) {
         try {
-
-
-            String tableNames = "";
-            for (String name: input.getNames()) {
-                tableNames += name + ",";
-            }
-            tableNames = tableNames.substring(0, tableNames.length() - 1);
-
-            String values = "";
-            for (Object value: input.getValues()){
-                values += "'" + value.toString() + "'" + ",";
-            }
-            values = values.substring(0, values.length()-1);
+            String tableNames = getNamesFormated(input, "%s,");
+            String values = getValueFormated(input, "'%s',");
 
             Statement stmt = connection.createStatement();
-              //                              (" + tableNames +  ") "    <-----------------
-            stmt.executeUpdate("INSERT INTO users " +
-                    "VALUES (" + values + ");");
-
-          //todo  insert into users(name, surname, id) values('Pops', 'Perops', 13);
-
+            stmt.executeUpdate("INSERT INTO users(" + tableNames +
+                    ") VALUES(" + values + ")");
             stmt.close();
         } catch (SQLException e) {
             System.out.println("create method didn't work " );
@@ -78,6 +23,14 @@ public class DatabaseManager {
         }
     }
 
+    private String getValueFormated(DataSet input, String format) {
+        String values = "";
+        for (Object value: input.getValues()){
+            values += String.format(format, value);
+        }
+        values = values.substring(0, values.length()-1);
+        return values;
+    }
 
 
     public String[] getTableNames(){
@@ -128,7 +81,7 @@ public class DatabaseManager {
 
     private int getSize(String tableName) throws SQLException {
         Statement stmt = connection.createStatement();
-        ResultSet rsCount = stmt.executeQuery("SELECT COUNT (*) FROM public." + tableName);
+        ResultSet rsCount = stmt.executeQuery("SELECT COUNT (*) FROM " + tableName);
         rsCount.next();
         int size = rsCount.getInt(1);
         rsCount.close();
@@ -154,6 +107,35 @@ public class DatabaseManager {
             connection = null;
         }
 
+    }
+
+    public void update(String tableName, int id, DataSet newValue){
+        try {
+            String tableNames = getNamesFormated(newValue, "%s = ?,");
+
+            String sql = "UPDATE " + tableName + " SET " + tableNames + " WHERE id = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+
+            int index = 1;
+            for (Object value: newValue.getValues()) {
+                ps.setObject(index, value);
+                index++;
+            }
+            ps.setObject(index, id);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("update didn`t work");
+            e.printStackTrace();
+        }
+    }
+
+    private String getNamesFormated(DataSet newValue, String format) {
+        String string = "";
+        for (String name: newValue.getNames()) {
+            string += String.format(format, name);
+        }
+        return string.substring(0, string.length() - 1);
     }
 
     public void clear(String tableName) {
