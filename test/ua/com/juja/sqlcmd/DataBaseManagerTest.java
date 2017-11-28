@@ -5,15 +5,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-import java.sql.Connection;
 import java.util.Arrays;
 
 public class DataBaseManagerTest {
 
-    private DatabaseManager manager;
+   // private JDBCDatabaseManager manager;
+    private InMemoryDatabaseManager manager;
     @Before
     public void setup(){
-        manager = new DatabaseManager();
+     //   manager = new JDBCDatabaseManager();
+        manager = new InMemoryDatabaseManager();
         manager.connect("postgres", "postgres", "postgres");
 
     }
@@ -81,8 +82,8 @@ public class DataBaseManagerTest {
 
         //when
         DataSet newValue = new DataSet();
-        newValue.put("surname", "Velychko");
         newValue.put("name", "Petro");
+        newValue.put("surname", "Velychko");
         manager.update("users", 9, newValue);
 
         //then
