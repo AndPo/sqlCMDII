@@ -48,7 +48,7 @@ public class DataSet {
 
     public Object get(String name) {
         for (int i = 0; i < freeIndex; i++) {
-            if(data[i].getName().equalsIgnoreCase(name)){
+            if(data[i].getName().equals(name)){
                 return data[i].getValue();
             }
         }

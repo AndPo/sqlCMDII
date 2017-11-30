@@ -9,8 +9,8 @@ import java.util.Arrays;
 
 public class DataBaseManagerTest {
 
-   // private JDBCDatabaseManager manager;
-    private InMemoryDatabaseManager manager;
+    private DatabaseManager manager;
+
     @Before
     public void setup(){
      //   manager = new JDBCDatabaseManager();
@@ -88,9 +88,11 @@ public class DataBaseManagerTest {
 
         //then
         DataSet[] users = manager.getTableData("users");
+        System.out.println(users[0].toString());
         assertEquals(1, users.length);
 
         DataSet user = users[0];
+        System.out.println(user.toString());
         assertEquals("[name, surname, id]", Arrays.toString(user.getNames()));
         assertEquals("[Petro, Velychko, 9]", Arrays.toString(user.getValues()));
 
